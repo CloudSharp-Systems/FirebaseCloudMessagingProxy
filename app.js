@@ -9,7 +9,7 @@ const MONGO_CONN_STR = process.env.APPSETTING_MONGODB_CREDS;
 const app = express();
 app.use(express.json())
 
-console.log("Env vars:", process.env);
+//console.log("Env vars:", process.env);
 
 app.get('/', (req, res) => {
   res.send('Hello, Fell World!');
@@ -25,8 +25,9 @@ app.post('/api/register_token', async (req, res) => {
 
 	//console.log(MONGO_CONN_STR);
 	const mongoClientObj = new MongoDBClient(MONGO_CONN_STR);
+	let registration_result;
 	await mongoClientObj.client_run(async (DBClient) => {
-		await register_FCMUser(DBClient, {
+		registration_result = await register_FCMUser(DBClient, {
 			"userid": userid,
 			"name": name,
 			"registration_token": registration_token,
@@ -35,11 +36,12 @@ app.post('/api/register_token', async (req, res) => {
 		});
 	}).catch(err => {
 		console.error(err);
+		registration_result = { valid_registration: false, message: "Registration failed!" };
 		//const current_date = new Date(Date.now());
 		//fs.writeFileSync(`error_logs/${current_date.toISOString()}.txt`, err.toString());
 	});
 
-	res.json({ "valid": true });
+	res.json(registration_result);
 });
 
 app.listen(port, () => {

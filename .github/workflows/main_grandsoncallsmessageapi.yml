@@ -3,9 +3,6 @@
 
 name: Build and deploy Node.js app to Azure Web App - GrandsonCallsMessageAPI
 
-env:
-  WEBSITES_PORT: 8080
-
 on:
   push:
     branches:
