@@ -9,6 +9,7 @@ const MONGO_CONN_STR = process.env.MONGODB_CREDS;
 const app = express();
 app.use(express.json())
 
+console.log("Env vars:", process.env);
 
 app.get('/', (req, res) => {
   res.send('Hello, Fell World!');
