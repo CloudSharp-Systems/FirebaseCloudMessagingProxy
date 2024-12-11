@@ -12,7 +12,7 @@ app.use(express.json())
 //console.log("Env vars:", process.env);
 
 app.get('/', (req, res) => {
-  res.send('Hello, Fell World!');
+  res.json({ "message": "Hello, Fell World!" });
 });
 
 app.post('/api/register_token', async (req, res) => {
