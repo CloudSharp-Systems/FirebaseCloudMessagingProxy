@@ -3,7 +3,7 @@ const express = require("express");
 const { MongoDBClient } = require("./database/mongo_client.js");
 const { register_FCMUser } = require("./database/FCMUser.js");
 
-const port = process.env.PORT || 3000;
+const port = process.env.WEBSITES_PORT || 3000;
 const MONGO_CONN_STR = process.env.MONGODB_CREDS;
 
 const app = express();
