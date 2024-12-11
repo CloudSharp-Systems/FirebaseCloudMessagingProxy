@@ -30,6 +30,8 @@ const mongo_insert_doc = async (client, database_name, collection_name, doc) => 
 	const collection = database.collection(collection_name);
 
 	const insert_result = await collection.insertOne(doc);
+	console.log(insert_result);
+	return insert_result;
 }
 
 // example filter: { "userid": "grandma00000019299394", "registration_token": { "$ne": "3892fu3hE:afoi..." } }
@@ -41,7 +43,9 @@ const mongo_merge_docs = async (client, database_name, source_collection_name, d
 		{ "$match": JSON.parse(JSON.stringify(filter)) },
 		{ "$merge": { "into": destination_collection_name } }
 	];
-	await source_collection.aggregate(aggregation).toArray();
+	const aggregate_result = await source_collection.aggregate(aggregation).toArray();
+	console.log(aggregate_result);
+	return { acknowledged: true, aggregated_array: aggregate_result };
 }
 
 const mongo_delete_docs = async (client, database_name, collection_name, filter) => {
@@ -49,6 +53,8 @@ const mongo_delete_docs = async (client, database_name, collection_name, filter)
 	const collection = database.collection(collection_name);
 
 	const delete_result = await collection.deleteMany(filter);
+	console.log(delete_result);
+	return delete_result;
 }
 
 
