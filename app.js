@@ -3,6 +3,9 @@ const express = require("express");
 const { MongoDBClient } = require("./database/mongo_client.js");
 const { register_FCMUser } = require("./database/FCMUser.js");
 const FCMMessaging = require("./messaging/FCMMessaging.js");
+const { register_FCMNotification } = require("./database/FCMNotification.js");
+const { send_notification } = require("./messaging/notification.js");
+
 
 const port = process.env.APPSETTING_WEBSITE_PORT || 3000;
 const MONGO_CONN_STR = process.env.APPSETTING_MONGODB_CREDS;
@@ -31,9 +34,8 @@ app.post('/api/register_token', async (req, res) => {
 
 	//console.log(MONGO_CONN_STR);
 	const mongoClientObj = new MongoDBClient(MONGO_CONN_STR);
-	let registration_result;
-	await mongoClientObj.client_run(async (DBClient) => {
-		registration_result = await register_FCMUser(DBClient, {
+	const registration_result = await mongoClientObj.client_run(async (DBClient) => {
+		return await register_FCMUser(DBClient, {
 			"userid": userid,
 			"name": name,
 			"registration_token": registration_token,
@@ -42,12 +44,53 @@ app.post('/api/register_token', async (req, res) => {
 		});
 	}).catch(err => {
 		console.error(err);
-		registration_result = { valid_registration: false, message: "Registration failed!" };
+		return { valid_registration: false, message: "Registration failed!" };
 		//const current_date = new Date(Date.now());
 		//fs.writeFileSync(`error_logs/${current_date.toISOString()}.txt`, err.toString());
 	});
 
 	res.json(registration_result);
+});
+
+
+app.post('/api/send_notification', async (req, res) => {
+	const bodyData = req.body;
+
+	const notification_obj = {
+		"from_token": bodyData.from_registration_token,
+		"to_userid": bodyData.to_userid,
+		"title": bodyData.title || null,
+		"body": bodyData.body,
+		"composed_timestamp": bodyData.composed_timestamp
+	};
+
+	//console.log(MONGO_CONN_STR);
+	const mongoClientObj = new MongoDBClient(MONGO_CONN_STR);
+	const mongo_send_result = await mongoClientObj.client_run(async (DBClient) => {
+		return await register_FCMNotification(DBClient, notification_obj);
+	}).catch(err => {
+		console.error(err);
+		return { valid_notification: false, message: "FCM notification DB recording failed!" };
+		//const current_date = new Date(Date.now());
+		//fs.writeFileSync(`error_logs/${current_date.toISOString()}.txt`, err.toString());
+	});
+	if (!mongo_send_result.valid_notification) {
+		res.json(mongo_send_result);
+		return;
+	}
+
+	const fcm_msg_client = fcm_messaging();
+	const fcm_response = await send_notification(fcm_msg_client, mongo_send_result.notification_title, notification_obj.body, { notification_number: mongo_send_result.notification_number.toString() }, mongo_send_result.to_token)
+		.then(response => {
+			return { notification_sent: true, message: "FCM notification sent.", ...response };
+		})
+		.catch(err => {
+			console.error(err);
+			return { notification_sent: false, message: "FCM notification sending failed!" };
+		});
+
+	res.json(fcm_response);
+
 });
 
 app.listen(port, () => {

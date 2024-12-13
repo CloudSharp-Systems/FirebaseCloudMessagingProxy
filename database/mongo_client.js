@@ -12,9 +12,10 @@ class MongoDBClient {
 		const client = new MongoClient(this._connection_str);
 		await client.connect();
 
-		await job(client);
+		const result = await job(client);
 
 		await client.close();
+		return result;
 	}
 
 }
@@ -36,11 +37,11 @@ const mongo_insert_doc = async (client, database_name, collection_name, doc) => 
 
 
 // example filter: { "userid": "grandma00000019299394", "registration_token": { "$ne": "3892fu3hE:afoi..." } }
-const mongo_find_docs = async (client, database_name, collection_name, filter) => {
+const mongo_find_docs = async (client, database_name, collection_name, filter, options = null) => {
 	const database = client.db(database_name);
 	const collection = database.collection(collection_name);
 
-	const find_result = collection.find(filter).toArray();
+	const find_result = ((options)? collection.find(filter, options) : collection.find(filter)).toArray();
 	return find_result;
 };
 
@@ -74,3 +75,4 @@ exports.mongo_insert_doc = mongo_insert_doc;
 exports.mongo_merge_docs = mongo_merge_docs;
 exports.mongo_delete_docs = mongo_delete_docs;
 exports.mongo_find_docs = mongo_find_docs;
+exports.CLOUDSHARP_USER_DB = "CloudSharpUserDocDB";

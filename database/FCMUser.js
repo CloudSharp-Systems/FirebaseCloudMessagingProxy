@@ -1,8 +1,6 @@
-const { mongo_ping_db, mongo_find_docs, mongo_merge_docs, mongo_delete_docs, mongo_insert_doc } = require("./mongo_client.js");
+const { CLOUDSHARP_USER_DB, mongo_find_docs, mongo_merge_docs, mongo_delete_docs, mongo_insert_doc } = require("./mongo_client.js");
 
 
-
-const CLOUDSHARP_USER_DB = "CloudSharpUserDocDB";
 
 // { "userid": "grandma00000019299394", "registration_token": { "$ne": "3892fu3hE:afoi..." } }
 const register_FCMUser = async (DBClient, user_obj) => {
