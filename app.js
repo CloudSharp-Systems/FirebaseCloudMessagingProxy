@@ -11,6 +11,7 @@ const FCM_ACCOUNT_KEY = JSON.parse(process.env.APPSETTING_FCM_SERVICE_ACCOUNT_KE
 const app = express();
 app.use(express.json());
 
+
 const fcm_messaging = FCMMessaging(FCM_ACCOUNT_KEY);
 
 
