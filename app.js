@@ -7,10 +7,12 @@ const FCMMessaging = require("./messaging/FCMMessaging.js");
 const port = process.env.APPSETTING_WEBSITE_PORT || 3000;
 const MONGO_CONN_STR = process.env.APPSETTING_MONGODB_CREDS;
 const FCM_ACCOUNT_KEY = JSON.parse(process.env.APPSETTING_FCM_SERVICE_ACCOUNT_KEY);
-//const fcm_messaging = FCMMessaging(FCM_ACCOUNT_KEY);
 
 const app = express();
 app.use(express.json());
+
+const fcm_messaging = FCMMessaging(FCM_ACCOUNT_KEY);
+
 
 //console.log("Env vars:", process.env);
 
