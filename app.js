@@ -2,12 +2,15 @@ const express = require("express");
 //const fs = require("node:fs");
 const { MongoDBClient } = require("./database/mongo_client.js");
 const { register_FCMUser } = require("./database/FCMUser.js");
+const FCMMessaging = require("./messaging/FCMMessaging.js");
 
 const port = process.env.APPSETTING_WEBSITE_PORT || 3000;
 const MONGO_CONN_STR = process.env.APPSETTING_MONGODB_CREDS;
+const FCM_ACCOUNT_KEY = JSON.parse(process.env.APPSETTING_FCM_SERVICE_ACCOUNT_KEY);
+//const fcm_messaging = FCMMessaging(FCM_ACCOUNT_KEY);
 
 const app = express();
-app.use(express.json())
+app.use(express.json());
 
 //console.log("Env vars:", process.env);
 
