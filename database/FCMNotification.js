@@ -58,7 +58,7 @@ const get_FCMNotifications_by_user = async (DBClient, user_obj) => {
 		_id: r._id,
 		from_registration_token: r.from_registration_token,
 		from_userid: r.from_userid,
-		from_name: r.sender_detail.name,
+		from_name: r.sender_detail[0].name,
 		to_registration_token: r.to_registration_token,
 		to_userid: r.to_userid,
 		to_name: find_user_result[0].name,
