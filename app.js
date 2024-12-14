@@ -72,7 +72,8 @@ app.get('/api/get_recent_notifications_by_user', async (req, res) => {
 		});
 	}).catch(err => {
 		console.error(err);
-		throw new Error("Recent notifications by user fetching failed!");
+		//throw new Error("Recent notifications by user fetching failed!");
+		res.status(500).send("Recent notifications by user fetching failed!");
 	});
 
 	res.json(query_result);
