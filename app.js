@@ -3,7 +3,7 @@ const express = require("express");
 const { MongoDBClient } = require("./database/mongo_client.js");
 const { register_FCMUser } = require("./database/FCMUser.js");
 const FCMMessaging = require("./messaging/FCMMessaging.js");
-const { register_FCMNotification } = require("./database/FCMNotification.js");
+const { register_FCMNotification, get_FCMNotifications_by_user } = require("./database/FCMNotification.js");
 const { send_notification } = require("./messaging/notification.js");
 
 
@@ -52,6 +52,31 @@ app.post('/api/register_token', async (req, res) => {
 	res.json(registration_result);
 });
 
+
+app.get('/api/get_recent_notifications_by_user', async (req, res) => {
+
+	const query_user = {
+		userid: req.query.userid,
+		registration_token: req.query.registrationtoken
+	};
+
+	const mongoClientObj = new MongoDBClient(MONGO_CONN_STR);
+	const query_result = await mongoClientObj.client_run(async (DBClient) => {
+		return notifications = (
+			await get_FCMNotifications_by_user(DBClient, query_user)
+		).map(notification => {
+			delete notification["from_registration_token"];
+			delete notification["to_registration_token"];
+			notification["notification_number"] = notification._id;
+			return notification;
+		});
+	}).catch(err => {
+		console.error(err);
+		throw new Error("Recent notifications by user fetching failed!");
+	});
+
+	res.json(query_result);
+});
 
 app.post('/api/send_notification', async (req, res) => {
 	const bodyData = req.body;

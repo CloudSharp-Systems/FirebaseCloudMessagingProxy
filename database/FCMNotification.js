@@ -1,4 +1,4 @@
-const { CLOUDSHARP_USER_DB, mongo_find_docs, mongo_insert_doc } = require("./mongo_client.js");
+const { CLOUDSHARP_USER_DB, mongo_find_docs, mongo_insert_doc, mongo_join_docs } = require("./mongo_client.js");
 
 
 
@@ -38,4 +38,39 @@ const register_FCMNotification = async (DBClient, notification_obj) => {
 	};
 };
 
+
+// require { userid: <string>, registration_token: <string> }
+const get_FCMNotifications_by_user = async (DBClient, user_obj) => {
+	const user_filter = { "userid": user_obj.userid, "registration_token": user_obj.registration_token };
+	const notification_filter = { "to_userid": user_obj.userid };
+	const recent_note_options = [ { "$sort": { _id: -1 } }, { "$limit": 10 } ];
+
+	const find_user_result = await mongo_find_docs(DBClient, CLOUDSHARP_USER_DB, "CL_FCM_USER", user_filter);
+	if (find_user_result.length === 0) throw new Error(`FCM Notification user not found!`);
+
+	const join_configs = [{
+		from: "CL_FCM_USER", localField: "from_userid", foreignField: "userid", as: "sender_detail"
+	}];
+	const find_recent_messages_result = await mongo_join_docs(DBClient, CLOUDSHARP_USER_DB, "CL_FCM_NOTIFICATION", join_configs, notification_filter, recent_note_options);
+	//if (!find_recent_messages_result.acknowledged) throw new Error("FCM Notification by user join query failed!");
+
+	return find_recent_messages_result.map(r => { return {
+		_id: r._id,
+		from_registration_token: r.from_registration_token,
+		from_userid: r.from_userid,
+		from_name: r.sender_detail.name,
+		to_registration_token: r.to_registration_token,
+		to_userid: r.to_userid,
+		to_name: find_user_result[0].name,
+		title: r.title,
+		body: r.body,
+		composed_timestamp: r.composed_timestamp,
+		edit_time: r.edit_time
+	}; });
+};
+
+
+
+
 exports.register_FCMNotification = register_FCMNotification;
+exports.get_FCMNotifications_by_user = get_FCMNotifications_by_user;

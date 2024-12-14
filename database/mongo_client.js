@@ -67,6 +67,21 @@ const mongo_delete_docs = async (client, database_name, collection_name, filter)
 	return delete_result;
 }
 
+// example join collection configs: [ { from: "products", localField: "product_id", foreignField: "_id", as: "orderdetails"} ]
+const mongo_join_docs = async (client, database_name, main_collection_name, join_collection_configs, main_filter, main_options = []) => {
+	const database = client.db(database_name);
+	const source_collection = database.collection(main_collection_name);
+
+	const aggregation = [
+		{ "$match": JSON.parse(JSON.stringify(main_filter)) },
+		...main_options,
+		...join_collection_configs.map(config => { return { "$lookup": config }; })
+	];
+	const aggregate_result = await source_collection.aggregate(aggregation).toArray();
+	//console.log(aggregate_result);
+	return aggregate_result;
+	//return { acknowledged: true, aggregated_array: aggregate_result };
+}
 
 
 exports.MongoDBClient = MongoDBClient;
@@ -75,4 +90,5 @@ exports.mongo_insert_doc = mongo_insert_doc;
 exports.mongo_merge_docs = mongo_merge_docs;
 exports.mongo_delete_docs = mongo_delete_docs;
 exports.mongo_find_docs = mongo_find_docs;
+exports.mongo_join_docs = mongo_join_docs;
 exports.CLOUDSHARP_USER_DB = "CloudSharpUserDocDB";
