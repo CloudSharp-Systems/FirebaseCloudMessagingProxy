@@ -60,6 +60,7 @@ app.get('/api/get_recent_notifications_by_user', async (req, res) => {
 		registration_token: req.query.registrationtoken
 	};
 
+	let dead_flag = false;
 	const mongoClientObj = new MongoDBClient(MONGO_CONN_STR);
 	const query_result = await mongoClientObj.client_run(async (DBClient) => {
 		return notifications = (
@@ -74,8 +75,10 @@ app.get('/api/get_recent_notifications_by_user', async (req, res) => {
 		console.error(err);
 		//throw new Error("Recent notifications by user fetching failed!");
 		res.status(500).send("Recent notifications by user fetching failed!");
-		return [];
+		dead_flag = true;
 	});
+
+	if (dead_flag) return;
 
 	res.json(query_result);
 });
